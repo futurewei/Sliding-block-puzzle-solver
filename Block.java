@@ -11,8 +11,8 @@ import java.util.*;
 public class Block {
     public static void main(String[] args) {
         Solver solver = new Solver();
-       // solver.solve("/Users/laiwei/Desktop/47B/Proj5/src/test1.txt", "1 1 1 3");
-        solver.solve("/Users/laiwei/Desktop/47B/Proj5/src/test1.txt", args[0]);
+        solver.solve("/Users/laiwei/Desktop/47B/Proj5/src/Big.txt", "1 1 139 139");
+       // solver.solve("/Users/laiwei/Desktop/47B/Proj5/src/test1.txt", args[0]);
     }
 }
 
@@ -41,7 +41,6 @@ class Solver{
     public  void solve(String path, String goal)
     {
         setup(path);
-        //wrong goal..
         String[] goal_loc = goal.split(" ");
         Goal = new Box(Integer.parseInt(goal_loc[0]), Integer.parseInt(goal_loc[1]),
                 Integer.parseInt(goal_loc[2]), Integer.parseInt(goal_loc[3]));
@@ -120,9 +119,9 @@ class Solver{
     public boolean DFS(Box Goal, ArrayList<Box> curConfi, Box last, int vertical, int horizental,
                        ArrayList<String> actions, StringBuilder state) {
 
-        System.out.println(last.row+"."+last.col);
+        //System.out.println(last.row+"."+last.col);
         if(seen_before.contains(state.toString())) {
-                System.out.println("seen before");
+                //System.out.println("seen before");
                 return false;
         }
         seen_before.add(state.toString());
@@ -131,9 +130,9 @@ class Solver{
         {
             return true;
         }
-
         for (int i = 0; i < curConfi.size(); i++) {
             Box cur = curConfi.get(i);
+            Box original = new Box(cur.height, cur.width, cur.row, cur.col);
             //System.out.println(i);
             if (Goal.height == cur.height && Goal.width == cur.width && Goal.row == cur.row && Goal.col == cur.col)
             {
@@ -153,14 +152,14 @@ class Solver{
                 //System.out.println("attempts"+cur.row+","+cur.col);
                 //print_confi(state_copy);
                 //if cannot move to this direction.
-                if (out_bounds(cur, vertical, horizental, state_copy))
+                if (out_bounds(cur, vertical, horizental, state_copy, original))
                 {
                     cur.row = c_row;
                     cur.col = c_col;
                     continue;
                 }
 
-                System.out.println("original:" + c_row+","+c_col +"  now:"+cur.row+","+cur.col);
+               // System.out.println("original:" + c_row+","+c_col +"  now:"+cur.row+","+cur.col);
 
                 //when moving, clear original occupied space
                 for(int startR = c_row; startR < c_row + cur.height; startR ++)
@@ -180,7 +179,7 @@ class Solver{
                     }
                 }
 
-                print_confi(state_copy);
+              //  print_confi(state_copy);
                 actions.add(action);
                 curConfi.set(i, cur);
                 if (DFS(Goal, curConfi, cur, vertical, horizental, actions, state_copy))
@@ -189,8 +188,8 @@ class Solver{
                 cur.col = c_col;
                 //state = state_copy;
                 curConfi.set(i, cur);
-                System.out.println("backtrack ");
-                print_confi(state);
+               // System.out.println("backtrack ");
+               // print_confi(state);
                 //also need to recover your fucking state!
                 actions.remove(actions.size()-1);
             }
@@ -199,7 +198,7 @@ class Solver{
     }
 
 
-    public  boolean out_bounds(Box cur, int row, int col, StringBuilder state)
+    public  boolean out_bounds(Box cur, int row, int col, StringBuilder state, Box original)
     {
         //check boundary
         if(cur.row < 0 || cur.row + cur.height > row || cur.col <0 || cur.col+ cur.width > col)
@@ -209,7 +208,9 @@ class Solver{
         {
             for(int startC = cur.col; startC < cur.col + cur.width; startC ++)
             {
-                if(state.charAt(startR*horizental + startC) == '1')
+                if(state.charAt(startR*horizental + startC) == '1' 
+                        && ! (( startR <= original.row + original.height && startC <= original.col + original.width)
+                                && (startR >= original.row && startC >= original.col)))
                     return true;
             }
         }
